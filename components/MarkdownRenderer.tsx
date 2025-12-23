@@ -7,7 +7,7 @@ interface MarkdownRendererProps {
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
   return (
-    <div className="text-sm md:text-base leading-relaxed text-gray-800 space-y-4">
+    <div className="text-sm md:text-base leading-relaxed text-gray-800 space-y-3">
       {renderContentWithTables(content)}
     </div>
   );
@@ -50,12 +50,12 @@ const LineRenderer: React.FC<{ line: string }> = ({ line }) => {
   // Regex para capturar ![alt](url) e **texto**
   const parts = line.split(/(!\[.*?\]\(.*?\))|(\*\*.*?\*\*)/g).filter(Boolean);
 
-  // Verifica se a linha é o cabeçalho do especialista (contém o mascote)
-  const hasMascot = line.includes('jAm2QjF.png');
+  // Verifica se a linha contém o mascote (avatar do especialista)
+  const isSpecialistHeader = line.includes('jAm2QjF.png');
 
-  if (hasMascot) {
+  if (isSpecialistHeader) {
     return (
-      <div className="flex items-center space-x-3 mb-4 pb-2 border-b border-gray-50 animate-in slide-in-from-left duration-500">
+      <div className="flex items-center space-x-3 mb-2 pb-2 border-b border-gray-100 animate-in fade-in duration-500">
         {parts.map((part, i) => {
           if (part.startsWith('![') && part.includes('jAm2QjF.png')) {
             const url = part.match(/\((.*?)\)/)?.[1] || "";
@@ -63,16 +63,16 @@ const LineRenderer: React.FC<{ line: string }> = ({ line }) => {
               <img 
                 key={i} 
                 src={url} 
-                alt="Especialista SK-G" 
-                className="h-10 w-10 md:h-12 md:w-12 rounded-full border-2 border-red-50 shadow-sm bg-white p-1" 
+                alt="Avatar Especialista" 
+                className="h-10 w-10 rounded-full border border-red-100 shadow-sm bg-white p-0.5" 
               />
             );
           }
           if (part.startsWith('**') && part.endsWith('**')) {
             return (
-              <h3 key={i} className="text-[#1a365d] font-black text-lg tracking-tight uppercase italic">
+              <span key={i} className="text-[#1a365d] font-black text-sm uppercase tracking-wider italic">
                 {part.slice(2, -2)}
-              </h3>
+              </span>
             );
           }
           return null;
@@ -82,25 +82,25 @@ const LineRenderer: React.FC<{ line: string }> = ({ line }) => {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1 mb-2">
+    <div className="flex flex-wrap items-center gap-1">
       {parts.map((part, i) => {
-        // Imagens genéricas
+        // Filtra imagens
         if (part.startsWith('![') && part.includes('](')) {
           const alt = part.match(/\[(.*?)\]/)?.[1] || "";
           const url = part.match(/\((.*?)\)/)?.[1] || "";
           
-          // Ignora o logo se ele aparecer por engano no markdown da resposta
+          // BLOQUEIO TOTAL DO LOGO NAS MENSAGENS (YRLwjsz.png)
           if (url.includes('YRLwjsz.png')) return null;
 
-          return <img key={i} src={url} alt={alt} className="max-w-full rounded-xl shadow-md my-4 border border-gray-100" />;
+          return <img key={i} src={url} alt={alt} className="max-w-full rounded-lg shadow-md my-2 border border-gray-100" />;
         }
 
         // Negrito
         if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={i} className="font-bold text-[#1a365d] bg-blue-50/50 px-1 rounded">{part.slice(2, -2)}</strong>;
+          return <strong key={i} className="font-bold text-[#b11818]">{part.slice(2, -2)}</strong>;
         }
 
-        // Texto simples
+        // Texto
         return <span key={i} className="text-gray-700">{part}</span>;
       })}
     </div>
@@ -120,22 +120,22 @@ const TableBlock: React.FC<{ rows: string[] }> = ({ rows }) => {
   const bodyRows = dataRows.slice(1).map(parseRow);
 
   return (
-    <div className="overflow-x-auto my-6 border border-gray-200 rounded-2xl shadow-lg">
+    <div className="overflow-x-auto my-4 border border-gray-200 rounded-xl shadow-md bg-white">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-[#f8f9fa]">
+        <thead className="bg-[#fcfcfc]">
           <tr>
             {headers.map((h, idx) => (
-              <th key={idx} className="px-4 py-4 text-left text-[10px] font-black text-[#1a365d] uppercase tracking-widest border-r border-gray-100 last:border-r-0">
+              <th key={idx} className="px-3 py-3 text-left text-[9px] font-black text-[#1a365d] uppercase tracking-widest border-r border-gray-50 last:border-r-0">
                 {h}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-100">
+        <tbody className="divide-y divide-gray-100">
           {bodyRows.map((row, rIdx) => (
-            <tr key={rIdx} className="hover:bg-red-50/20 transition-colors">
+            <tr key={rIdx} className="hover:bg-red-50/10 transition-colors">
               {row.map((cell, cIdx) => (
-                <td key={cIdx} className="px-4 py-3 text-sm text-gray-700 border-r border-gray-50 last:border-r-0">
+                <td key={cIdx} className="px-3 py-2.5 text-xs text-gray-600 border-r border-gray-50 last:border-r-0">
                    <LineRenderer line={cell} />
                 </td>
               ))}
