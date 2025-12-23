@@ -14,7 +14,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 };
 
 const renderContentWithTables = (text: string) => {
-  // Regex para identificar Imagens, Negrito e Tabelas
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let tableRows: string[] = [];
@@ -35,7 +34,6 @@ const renderContentWithTables = (text: string) => {
       }
       
       if (trimmed !== '') {
-        // Processa imagens, negrito e texto simples na mesma linha
         elements.push(<LineRenderer key={`line-${i}`} line={line} />);
       }
     }
@@ -52,37 +50,58 @@ const LineRenderer: React.FC<{ line: string }> = ({ line }) => {
   // Regex para capturar ![alt](url) e **texto**
   const parts = line.split(/(!\[.*?\]\(.*?\))|(\*\*.*?\*\*)/g).filter(Boolean);
 
+  // Verifica se a linha é o cabeçalho do especialista (contém o mascote)
+  const hasMascot = line.includes('jAm2QjF.png');
+
+  if (hasMascot) {
+    return (
+      <div className="flex items-center space-x-3 mb-4 pb-2 border-b border-gray-50 animate-in slide-in-from-left duration-500">
+        {parts.map((part, i) => {
+          if (part.startsWith('![') && part.includes('jAm2QjF.png')) {
+            const url = part.match(/\((.*?)\)/)?.[1] || "";
+            return (
+              <img 
+                key={i} 
+                src={url} 
+                alt="Especialista SK-G" 
+                className="h-10 w-10 md:h-12 md:w-12 rounded-full border-2 border-red-50 shadow-sm bg-white p-1" 
+              />
+            );
+          }
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <h3 key={i} className="text-[#1a365d] font-black text-lg tracking-tight uppercase italic">
+                {part.slice(2, -2)}
+              </h3>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-1 mb-2">
       {parts.map((part, i) => {
-        // Caso seja IMAGEM
+        // Imagens genéricas
         if (part.startsWith('![') && part.includes('](')) {
           const alt = part.match(/\[(.*?)\]/)?.[1] || "";
           const url = part.match(/\((.*?)\)/)?.[1] || "";
           
-          const isMascot = url.includes('jAm2QjF.png');
-          const isLogo = url.includes('YRLwjsz.png');
+          // Ignora o logo se ele aparecer por engano no markdown da resposta
+          if (url.includes('YRLwjsz.png')) return null;
 
-          if (isLogo) {
-            return <img key={i} src={url} alt={alt} className="h-6 w-auto mb-1 block" />;
-          }
-          if (isMascot) {
-            return (
-              <div key={i} className="flex items-center space-x-2 my-2 w-full animate-in slide-in-from-left duration-500">
-                <img src={url} alt={alt} className="h-10 w-10 md:h-12 md:w-12 rounded-full border-2 border-red-100 shadow-sm bg-white p-1" />
-              </div>
-            );
-          }
-          return <img key={i} src={url} alt={alt} className="max-w-full rounded-lg shadow-sm my-2" />;
+          return <img key={i} src={url} alt={alt} className="max-w-full rounded-xl shadow-md my-4 border border-gray-100" />;
         }
 
-        // Caso seja NEGRITO
+        // Negrito
         if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={i} className="font-black text-[#1a365d]">{part.slice(2, -2)}</strong>;
+          return <strong key={i} className="font-bold text-[#1a365d] bg-blue-50/50 px-1 rounded">{part.slice(2, -2)}</strong>;
         }
 
-        // Caso seja TEXTO SIMPLES
-        return <span key={i}>{part}</span>;
+        // Texto simples
+        return <span key={i} className="text-gray-700">{part}</span>;
       })}
     </div>
   );
@@ -101,7 +120,7 @@ const TableBlock: React.FC<{ rows: string[] }> = ({ rows }) => {
   const bodyRows = dataRows.slice(1).map(parseRow);
 
   return (
-    <div className="overflow-x-auto my-6 border border-gray-200 rounded-2xl shadow-md">
+    <div className="overflow-x-auto my-6 border border-gray-200 rounded-2xl shadow-lg">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-[#f8f9fa]">
           <tr>
@@ -114,7 +133,7 @@ const TableBlock: React.FC<{ rows: string[] }> = ({ rows }) => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
           {bodyRows.map((row, rIdx) => (
-            <tr key={rIdx} className="hover:bg-red-50/30 transition-colors">
+            <tr key={rIdx} className="hover:bg-red-50/20 transition-colors">
               {row.map((cell, cIdx) => (
                 <td key={cIdx} className="px-4 py-3 text-sm text-gray-700 border-r border-gray-50 last:border-r-0">
                    <LineRenderer line={cell} />

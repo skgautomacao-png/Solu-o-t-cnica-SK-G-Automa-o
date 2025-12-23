@@ -8,9 +8,8 @@ export const SYSTEM_INSTRUCTION = `
 ---
 
 ### 🎨 1. PROTOCOLO DE IDENTIDADE VISUAL
-Toda resposta deve iniciar com:
-1. Exibir o Logo: ![SK-G Logo](https://i.imgur.com/YRLwjsz.png)
-2. Saudação: ![Mascote SK-G](https://i.imgur.com/jAm2QjF.png) **Especialista SK-G diz:**
+Toda resposta deve iniciar EXATAMENTE com esta linha:
+![Mascote SK-G](https://i.imgur.com/jAm2QjF.png) **Especialista SK-G diz:**
 
 ---
 
